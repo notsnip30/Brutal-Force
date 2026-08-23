@@ -3,305 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRUTAL DRIVE - Link Gateway</title>
+    <title>BRUTAL FORCE - File Gateway</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
     <style>
+        * { font-family: 'Space Grotesk', sans-serif; }
         body { background: #050508; overflow-x: hidden; }
 
         .bg-mesh {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0;
-            background: radial-gradient(circle at 20% 30%, rgba(220, 38, 38, 0.25) 0%, transparent 40%),
-                        radial-gradient(circle at 80% 70%, rgba(153, 27, 27, 0.2) 0%, transparent 40%),
+            background: radial-gradient(circle at 20% 30%, rgba(220, 38, 38, 0.2) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(153, 27, 27, 0.15) 0%, transparent 40%),
                         radial-gradient(circle at 50% 50%, rgba(24, 24, 27, 0.8) 0%, transparent 70%);
             filter: blur(60px); animation: meshMove 12s ease-in-out infinite alternate;
         }
+
         @keyframes meshMove {
             0% { transform: scale(1) translate(0, 0); }
             50% { transform: scale(1.1) translate(-2%, 3%); }
             100% { transform: scale(1.05) translate(2%, -2%); }
         }
 
-        /* Modern Rounded Glass Containers */
         .glass-cyber {
-            background: rgba(18, 18, 23, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1.25rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(239, 68, 68, 0.05);
+            background: rgba(18, 18, 23, 0.85); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(239, 68, 68, 0.05);
         }
 
-        .glass-input {
-            background: rgba(10, 10, 14, 0.7); border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 0.85rem;
+        .timer-box {
+            position: relative; width: 100px; height: 100px; margin: 0 auto 1rem;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        .btn-cyber {
+        .timer-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        .timer-circle-bg { fill: none; stroke: #1f2937; stroke-width: 6; }
+        .timer-circle-progress {
+            fill: none; stroke: #ef4444; stroke-width: 6;
+            stroke-dasharray: 283; stroke-dashoffset: 0; stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .ad-container-box {
+            width: 100%; min-height: 85px; background: rgba(10, 10, 14, 0.6);
+            border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 0.85rem;
+            padding: 8px; margin-bottom: 0.75rem; overflow: hidden; position: relative;
+        }
+
+        .btn-cyber-disabled { background: #27272a; color: #71717a; cursor: not-allowed; border-radius: 0.85rem; }
+        .btn-cyber-active {
             background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-            border-radius: 0.85rem;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 0.85rem; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            transition: all 0.25s ease;
         }
-        .btn-cyber:hover { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); transform: translateY(-2px); }
+        .btn-cyber-active:hover { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); transform: translateY(-2px); }
+
+        .btn-blue-active {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-radius: 0.85rem; box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+            transition: all 0.25s ease;
+        }
+        .btn-blue-active:hover { box-shadow: 0 0 25px rgba(37, 99, 235, 0.8); transform: translateY(-2px); }
 
         .glow-title { text-shadow: 0 0 12px rgba(239, 68, 68, 0.6); }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .zoom-in { animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        .click-ad-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50; cursor: pointer; background: rgba(239, 68, 68, 0.15);
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid rgba(239, 68, 68, 0.6); border-radius: 0.85rem;
+        }
     </style>
 </head>
-<body class="text-zinc-100 min-h-screen flex items-center justify-center p-4 font-sans selection:bg-red-500 selection:text-white relative">
+<body class="text-zinc-100 min-h-screen flex items-center justify-center p-4 relative">
 
     <div class="bg-mesh"></div>
 
-    <div id="mainContainer" class="max-w-md w-full glass-cyber p-7 zoom-in relative z-10 my-6">
+    <div class="max-w-md w-full glass-cyber p-6 relative z-10 my-6 text-center">
         
-        <div class="text-center mb-6">
-            <h1 class="text-3xl font-black text-red-500 tracking-wider flex items-center justify-center gap-2 glow-title">
-                <i class="fa-solid fa-bolt animate-pulse"></i> BRUTAL DRIVE
+        <!-- Header -->
+        <div class="mb-4">
+            <h1 class="text-2xl font-black text-red-500 tracking-wider flex items-center justify-center gap-2 glow-title">
+                <i class="fa-solid fa-bolt animate-pulse"></i> BRUTAL FORCE
             </h1>
-            <p class="text-[11px] text-zinc-400 font-mono tracking-widest mt-1 uppercase">Direct Gateway & Protection</p>
+            <p class="text-[11px] text-zinc-400 font-mono tracking-widest mt-0.5 uppercase">
+                Secure Direct Gateway
+            </p>
         </div>
 
-        <!-- GENERATOR VIEW -->
-        <div id="shortenerView" class="space-y-5 fade-in">
-            <div class="p-6 glass-input relative text-center">
-                <i id="genIcon" class="fa-solid fa-gears text-5xl text-red-500 mb-3 animate-spin"></i>
-                <h3 id="genTitle" class="text-sm font-black text-zinc-100 uppercase tracking-wide">
-                    Generating Short Link...
-                </h3>
-                <p id="genStatus" class="text-[11px] text-zinc-400 font-mono mt-1">
-                    Contacting Shortener Gateway API...
-                </p>
+        <!-- Setup Video Badge (Coming Soon) -->
+        <div class="bg-zinc-900/90 border border-yellow-500/30 rounded-xl p-2.5 mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-xs font-bold text-yellow-400">
+                <i class="fa-solid fa-clapperboard text-yellow-500"></i>
+                <span>Setup Video:</span>
             </div>
+            <span class="bg-yellow-500/20 text-yellow-300 text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border border-yellow-500/40 animate-pulse">
+                COMING SOON ⏳
+            </span>
+        </div>
 
-            <div id="shortenerResult" class="hidden space-y-3 glass-input p-4 fade-in">
-                <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Your Monetized / Protection Link:</label>
-                <div class="flex gap-2">
-                    <input type="text" id="generatedUrl" readonly class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-red-400 font-mono focus:outline-none">
-                    <button onclick="copyText(document.getElementById('generatedUrl').value)" class="btn-cyber px-4 py-2 text-white text-xs font-bold flex items-center gap-1 active:scale-95">
-                        <i class="fa-solid fa-copy"></i>
-                    </button>
-                </div>
+        <!-- Master 30s Timer -->
+        <div class="timer-box">
+            <svg class="timer-svg" viewBox="0 0 100 100">
+                <circle class="timer-circle-bg" cx="50" cy="50" r="45"></circle>
+                <circle class="timer-circle-progress" id="progress-bar" cx="50" cy="50" r="45"></circle>
+            </svg>
+            <div class="absolute text-2xl font-black text-white" id="timer-text">30</div>
+        </div>
+
+        <!-- Stage Box -->
+        <div class="mb-3 p-2 bg-red-950/30 border border-red-500/30 rounded-lg" id="stage-box">
+            <p class="text-[11px] font-bold text-red-400 uppercase tracking-wide" id="stage-text">
+                <i class="fa-solid fa-spinner fa-spin mr-1"></i> Stage 1: Running Timer (10s)
+            </p>
+        </div>
+
+        <!-- Primary Interactive Ad Unit -->
+        <div class="ad-container-box">
+            <div class="click-ad-overlay" id="ad-overlay" onclick="handleStageAdClick()" style="display: none;">
+                <span class="bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wider animate-bounce flex items-center gap-1">
+                    <i class="fa-solid fa-lock-open"></i> <span id="overlay-text">Click Ad to Resume Timer</span>
+                </span>
             </div>
+            <iframe data-aa='2453083' src='//acceptable.a-ads.com/2453083/?size=Adaptive'
+                    style='border:0; padding:0; width:100%; height:auto; overflow:hidden; display: block; margin: auto;'></iframe>
+        </div>
 
-            <!-- MANUAL CONTROLS & DISCORD -->
-            <div class="space-y-2">
-                <button onclick="generateShortLink('exe')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center rounded-xl">
-                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force EXE.IO Link</span>
-                    <i class="fa-solid fa-chevron-right text-zinc-500 text-[10px]"></i>
-                </button>
-                <button onclick="generateShortLink('cuty')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center rounded-xl">
-                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force CUTY.IO Link</span>
-                    <i class="fa-solid fa-chevron-right text-zinc-500 text-[10px]"></i>
-                </button>
-            </div>
-
-            <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300 rounded-xl">
-                <div class="flex items-center gap-3">
-                    <i class="fa-brands fa-discord text-2xl text-indigo-400 group-hover:scale-110 transition-transform"></i>
-                    <div class="text-left">
-                        <p class="text-xs font-bold text-zinc-200">BRUTAL FORCE DISCORD</p>
-                        <p class="text-[10px] text-zinc-400">Panels, Injectors & Exchange Services</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-xs text-zinc-500 group-hover:text-indigo-400 transition-colors"></i>
+        <!-- Action Button 1: Backup ROM -->
+        <div class="mb-3">
+            <button id="rom-btn" class="btn-cyber-disabled w-full py-3 text-center text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2" disabled>
+                <i class="fa-solid fa-lock" id="rom-icon"></i>
+                <span id="rom-btn-text">Backup ROM (30s Wait)</span>
             </button>
         </div>
 
-        <!-- DOWNLOAD VIEW: TRIGGERED UPON REDIRECT (?complete or ?download or /d=) -->
-        <div id="downloadView" class="hidden text-center space-y-5 fade-in">
-            <div class="p-6 glass-input relative group">
-                <div class="absolute -top-3 right-3 bg-red-600 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-widest border border-red-400">
-                    VERIFIED FILE
-                </div>
-                <i class="fa-solid fa-file-zipper text-5xl text-red-500 mb-3 animate-bounce"></i>
-                <h3 class="text-base font-black text-zinc-100 break-all uppercase tracking-wide" id="fileTitle">
-                    Brutal_Force_V1.7z
-                </h3>
-                <p class="text-[11px] text-zinc-400 font-mono mt-1" id="fileSubtext">
-                    BACKUP ROM NON ROOT BRUTAL FORCE V1 INJECTOR
-                </p>
-            </div>
-
-            <div class="glass-input p-3">
-                <p class="text-xs text-zinc-300 font-medium">
-                    Automatic download starting in <span id="timer" class="text-red-500 font-black text-base px-1">3</span>s...
-                </p>
-            </div>
-
-            <a id="downloadBtn" href="#" class="btn-cyber block w-full text-white font-bold py-3.5 text-xs tracking-wider uppercase active:scale-95 text-center">
-                <i class="fa-solid fa-download mr-1.5"></i> Download File Now
-            </a>
-
-            <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300 rounded-xl">
-                <div class="flex items-center gap-3">
-                    <i class="fa-brands fa-discord text-2xl text-indigo-400 group-hover:scale-110 transition-transform"></i>
-                    <div class="text-left">
-                        <p class="text-xs font-bold text-zinc-200">BRUTAL FORCE DISCORD</p>
-                        <p class="text-[10px] text-zinc-400">Panels, Injectors & Exchange Services</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-xs text-zinc-500 group-hover:text-indigo-400 transition-colors"></i>
+        <!-- Action Button 2: Vphone Bypass Non Root -->
+        <div class="mb-4">
+            <button id="app-btn" class="btn-cyber-disabled w-full py-3 text-center text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2" disabled>
+                <i class="fa-solid fa-lock" id="app-icon"></i>
+                <span id="app-btn-text">Vphone Bypass Non Root (30s Wait)</span>
             </button>
         </div>
-    </div>
 
-    <!-- DISCORD MODAL -->
-    <div id="discordModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50 fade-in">
-        <div class="max-w-md w-full glass-cyber p-6 relative zoom-in space-y-4">
-            <button onclick="closeDiscordModal()" class="absolute top-3 right-4 text-zinc-500 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            <div class="text-center space-y-1">
-                <div class="w-14 h-14 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto mb-2 border border-indigo-500/40">
-                    <i class="fa-brands fa-discord text-3xl text-indigo-400"></i>
-                </div>
-                <h2 class="text-xl font-black text-white tracking-wide glow-title">JOIN BRUTAL FORCE</h2>
-                <p class="text-[11px] text-zinc-400 uppercase font-mono">Official Community & Premium Services</p>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-[11px] text-zinc-300 py-2">
-                <div class="glass-input p-2.5 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-red-500"></i> Paid & Free Panels</div>
-                <div class="glass-input p-2.5 flex items-center gap-2"><i class="fa-solid fa-mobile-screen text-red-500"></i> Android, iOS, PC</div>
-                <div class="glass-input p-2.5 flex items-center gap-2"><i class="fa-solid fa-arrow-right-arrow-left text-red-500"></i> NPR ⇆ USDT</div>
-                <div class="glass-input p-2.5 flex items-center gap-2"><i class="fa-solid fa-gift text-red-500"></i> Redeem Cards & Topup</div>
-                <div class="glass-input p-2.5 flex items-center gap-2"><i class="fa-brands fa-tiktok text-red-500"></i> TikTok Coins</div>
-                <div class="glass-input p-2.5 flex items-center gap-2"><i class="fa-solid fa-server text-red-500"></i> Domain & Hosting</div>
-            </div>
-            <div class="space-y-2 pt-2">
-                <a href="https://discord.gg/TpYPgu6yJ5" target="_blank" class="btn-cyber w-full py-3 text-center text-white text-xs font-bold block uppercase tracking-wider"><i class="fa-brands fa-discord mr-2"></i> Join Discord Server</a>
-                <button onclick="closeDiscordModal()" class="w-full py-2 text-center text-zinc-500 hover:text-zinc-300 text-xs font-semibold">Close</button>
-            </div>
+        <!-- Secondary Ad Unit -->
+        <div class="ad-container-box">
+            <iframe data-aa='2453083' src='//acceptable.a-ads.com/2453083/?size=Adaptive&v=2'
+                    style='border:0; padding:0; width:100%; height:auto; overflow:hidden; display: block; margin: auto;'></iframe>
         </div>
+
+        <div class="mt-2 text-[10px] text-zinc-500 font-mono">
+            Powered by Brutal Force Direct Gateway
+        </div>
+
     </div>
 
     <script>
-        // CONFIGURATION SETUP
-        const GDRIVE_DIRECT_URL = "https://drive.usercontent.google.com/download?id=1xr1Q_6LjKQeT_TvKlgibZ0i1UXqCunR2&export=download&confirm=t";
-        const REDIRECT_DESTINATION = "https://notsnip30.github.io/Brutal-Force/?complete";
+        const ROM_DOWNLOAD_URL = "https://drive.google.com/file/d/1xr1Q_6LjKQeT_TvKlgibZ0i1UXqCunR2/view?usp=drivesdk";
+        const APP_DOWNLOAD_URL = "https://drive.google.com/file/d/14coHZpgMAJQExqNYxWkGtc_zs_JbImMb/view?usp=drivesdk";
+        const ADSTERRA_DIRECT_LINK = "https://www.profitableratecpmnetwork.com/gsc5uhf5i?key=d23f866fa93aa3e6aa5c4b4754586d20";
 
-        const EXE_API_KEY = "747727238dcb80e155f1022cd1cd67a00d7a0f73";
-        const CUTY_API_KEY = "51de1b44bfcdf0af37f2302cfc9605641d02e726";
+        let secondsLeft = 30;
+        let isPaused = false;
+        let currentStage = 1;
 
-        // ROUTER INITIALIZATION
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentUrl = window.location.href.toLowerCase();
+        const timerText = document.getElementById("timer-text");
+        const progressBar = document.getElementById("progress-bar");
+        const stageBox = document.getElementById("stage-box");
+        const stageText = document.getElementById("stage-text");
+        const adOverlay = document.getElementById("ad-overlay");
+        const overlayText = document.getElementById("overlay-text");
 
-        // CHECK IF USER HAS COMPLETED LINK SHORTENER AND RETURNED
-        if (urlParams.has('complete') || currentUrl.includes('complete') || currentUrl.includes('d=')) {
-            // SHOW DIRECT DOWNLOAD PAGE
-            document.getElementById('shortenerView').classList.add('hidden');
-            document.getElementById('downloadView').classList.remove('hidden');
-            startDownloadSequence();
-        } else if (currentUrl.includes('cuty')) {
-            // TRIGGER CUTY.IO SHORTENER DIRECTLY
-            generateShortLink('cuty');
-        } else {
-            // DEFAULT: TRIGGER EXE.IO SHORTENER WITH FAILOVER
-            generateShortLink('exe');
-        }
+        const romBtn = document.getElementById("rom-btn");
+        const romIcon = document.getElementById("rom-icon");
+        const romBtnText = document.getElementById("rom-btn-text");
 
-        async function generateShortLink(primaryService) {
-            const genTitle = document.getElementById('genTitle');
-            const genStatus = document.getElementById('genStatus');
-            const genIcon = document.getElementById('genIcon');
-            const shortenerResult = document.getElementById('shortenerResult');
-            const generatedUrlInput = document.getElementById('generatedUrl');
+        const appBtn = document.getElementById("app-btn");
+        const appIcon = document.getElementById("app-icon");
+        const appBtnText = document.getElementById("app-btn-text");
 
-            genIcon.className = "fa-solid fa-gears text-5xl text-red-500 mb-3 animate-spin";
-            shortenerResult.classList.add('hidden');
+        const totalDash = 283;
 
-            let shortenedUrl = null;
+        // Master 30s Timer Cycle
+        const timerInterval = setInterval(() => {
+            if (isPaused) return;
 
-            if (primaryService === 'exe') {
-                genTitle.innerText = "Requesting EXE.IO Gateway...";
-                genStatus.innerText = "Generating monetized link...";
-                shortenedUrl = await fetchWithTimeout('exe', 5000);
+            secondsLeft--;
+            timerText.innerText = secondsLeft;
 
-                if (!shortenedUrl) {
-                    genTitle.innerText = "EXE.IO Failed • Switching to CUTY.IO";
-                    genStatus.innerText = "Failover triggered automatically...";
-                    shortenedUrl = await fetchWithTimeout('cuty', 5000);
-                }
-            } else {
-                genTitle.innerText = "Requesting CUTY.IO Gateway...";
-                genStatus.innerText = "Generating monetized link...";
-                shortenedUrl = await fetchWithTimeout('cuty', 5000);
+            const offset = totalDash - (secondsLeft / 30) * totalDash;
+            progressBar.style.strokeDashoffset = offset;
+
+            if (secondsLeft === 20 && currentStage === 1) {
+                pauseForAdRequirement(2, "Stage 1 Clear! Click Ad To Start Stage 2");
+            } else if (secondsLeft === 10 && currentStage === 2) {
+                pauseForAdRequirement(3, "Stage 2 Clear! Click Ad To Unlock Final Stage");
+            } else if (secondsLeft <= 0) {
+                clearInterval(timerInterval);
+                finishUnlockProcess();
             }
+        }, 1000);
 
-            if (shortenedUrl) {
-                genIcon.className = "fa-solid fa-circle-check text-5xl text-green-500 mb-3";
-                genTitle.innerText = "Shortened Link Ready";
-                genStatus.innerText = "Directing to destination link...";
-                generatedUrlInput.value = shortenedUrl;
-                shortenerResult.classList.remove('hidden');
-
-                // AUTO REDIRECT TO SHORTENED LINK AFTER GENERATION
-                setTimeout(() => {
-                    window.location.href = shortenedUrl;
-                }, 1500);
-
-            } else {
-                // FALLBACK IF BOTH APIS ARE BLOCKED BY CORS / AD BLOCKERS
-                genIcon.className = "fa-solid fa-triangle-exclamation text-5xl text-yellow-500 mb-3";
-                genTitle.innerText = "Direct Redirect Active";
-                genStatus.innerText = "APIs busy or blocked. Redirecting to download...";
-                setTimeout(() => {
-                    window.location.href = REDIRECT_DESTINATION;
-                }, 2000);
-            }
-        }
-
-        async function fetchWithTimeout(provider, timeout = 5000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-
-            let apiUrl = "";
-            if (provider === 'exe') {
-                apiUrl = `https://exe.io/api?api=${EXE_API_KEY}&url=${encodeURIComponent(REDIRECT_DESTINATION)}`;
-            } else if (provider === 'cuty') {
-                apiUrl = `https://cuty.io/api?api=${CUTY_API_KEY}&url=${encodeURIComponent(REDIRECT_DESTINATION)}`;
-            }
-
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
-
-            try {
-                const response = await fetch(proxyUrl, { signal: controller.signal });
-                clearTimeout(id);
-                if (!response.ok) return null;
-                const data = await response.json();
-                const apiData = JSON.parse(data.contents);
-
-                if (apiData.shortenedUrl) return apiData.shortenedUrl;
-                if (apiData.url) return apiData.url;
-                return null;
-            } catch (e) {
-                console.error(`${provider} API Error or Timeout:`, e);
-                return null;
-            }
-        }
-
-        function startDownloadSequence() {
-            const downloadBtn = document.getElementById('downloadBtn');
-            downloadBtn.href = GDRIVE_DIRECT_URL;
-
-            let seconds = 3;
-            const timerElement = document.getElementById('timer');
+        function pauseForAdRequirement(nextStage, message) {
+            isPaused = true;
+            currentStage = nextStage;
             
-            const countdown = setInterval(() => {
-                seconds--;
-                timerElement.innerText = seconds;
-                if (seconds <= 0) {
-                    clearInterval(countdown);
-                    window.location.href = GDRIVE_DIRECT_URL;
-                }
-            }, 1000);
+            overlayText.innerText = message;
+            adOverlay.style.display = "flex";
+
+            stageBox.className = "mb-3 p-2 bg-yellow-950/40 border border-yellow-500/40 rounded-lg";
+            stageText.className = "text-[11px] font-bold text-yellow-400 uppercase tracking-wide";
+            stageText.innerHTML = `<i class="fa-solid fa-hand mr-1"></i> PAUSED: Click Ad Overlay Below to Continue`;
         }
 
-        function copyText(text) { 
-            navigator.clipboard.writeText(text); 
-            alert('Shortened link copied to clipboard!'); 
+        function handleStageAdClick() {
+            window.open(ADSTERRA_DIRECT_LINK, '_blank');
+
+            adOverlay.style.display = "none";
+            isPaused = false;
+
+            stageBox.className = "mb-3 p-2 bg-red-950/30 border border-red-500/30 rounded-lg";
+            stageText.className = "text-[11px] font-bold text-red-400 uppercase tracking-wide";
+            stageText.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Stage ${currentStage} Running...`;
         }
-        function openDiscordModal() { document.getElementById('discordModal').classList.remove('hidden'); }
-        function closeDiscordModal() { document.getElementById('discordModal').classList.add('hidden'); }
+
+        function finishUnlockProcess() {
+            stageBox.className = "mb-3 p-2 bg-green-950/40 border border-green-500/40 rounded-lg";
+            stageText.className = "text-[11px] font-bold text-green-400 uppercase tracking-wide";
+            stageText.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ALL FILES UNLOCKED!`;
+
+            // Unlock Backup ROM
+            romBtn.disabled = false;
+            romBtn.className = "btn-cyber-active w-full py-3 text-center text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer";
+            romIcon.className = "fa-solid fa-download";
+            romBtnText.innerText = "DOWNLOAD BACKUP ROM (.7Z)";
+
+            // Unlock Vphone Bypass Non Root
+            appBtn.disabled = false;
+            appBtn.className = "btn-blue-active w-full py-3 text-center text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer";
+            appIcon.className = "fa-solid fa-download";
+            appBtnText.innerText = "DOWNLOAD VPHONE BYPASS NON ROOT (.APK)";
+
+            romBtn.addEventListener("click", () => window.location.href = ROM_DOWNLOAD_URL);
+            appBtn.addEventListener("click", () => window.location.href = APP_DOWNLOAD_URL);
+        }
     </script>
 </body>
 </html>
