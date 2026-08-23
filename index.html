@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brutal Force - Direct File Host</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-black text-red-500 tracking-wider flex items-center justify-center gap-2">
+                <i class="fa-solid font-bolt"></i> BRUTAL DRIVE
+            </h1>
+            <p class="text-xs text-zinc-400 mt-1">Direct Upload & Auto-Download Gateway</p>
+        </div>
+
+        <!-- UPLOADER VIEW (Default) -->
+        <div id="uploadView" class="space-y-4">
+            <div id="dropZone" class="border-2 border-dashed border-zinc-700 hover:border-red-500 rounded-xl p-8 text-center cursor-pointer transition">
+                <i class="fa-solid fa-cloud-arrow-up text-4xl text-zinc-500 mb-2"></i>
+                <p class="text-sm text-zinc-300 font-medium">Click or Drag File to Upload</p>
+                <p class="text-xs text-zinc-500 mt-1">Up to 20 GB supported via Pixeldrain</p>
+                <input type="file" id="fileInput" class="hidden">
+            </div>
+
+            <div id="progressBox" class="hidden space-y-2">
+                <div class="flex justify-between text-xs text-zinc-400">
+                    <span id="fileName">Uploading...</span>
+                    <span id="percentText">0%</span>
+                </div>
+                <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+                    <div id="progressBar" class="bg-red-500 h-full w-0 transition-all duration-200"></div>
+                </div>
+            </div>
+
+            <div id="resultBox" class="hidden space-y-3">
+                <label class="text-xs text-zinc-400 font-semibold uppercase">Shareable Direct Download Link:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="shareLink" readonly class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-red-400 focus:outline-none">
+                    <button onclick="copyLink()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOWNLOADER VIEW (Triggers via URL Query) -->
+        <div id="downloadView" class="hidden text-center space-y-5">
+            <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                <i class="fa-solid fa-file-zipper text-4xl text-red-500 mb-2"></i>
+                <h3 class="text-sm font-bold text-zinc-200" id="dlFileName">Brutal_Force_V1.7z</h3>
+                <p class="text-xs text-zinc-500 mt-1">Direct Auto-Download Request</p>
+            </div>
+
+            <p class="text-xs text-zinc-400">
+                Your download should start automatically in <span id="timer" class="text-red-500 font-bold">3</span> seconds...
+            </p>
+
+            <a id="manualDlBtn" href="#" class="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-red-900/20">
+                <i class="fa-solid fa-download mr-1"></i> Grant Permission & Download Now
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = "829c423d-b0f5-4e16-a1a2-8ca8008f0dda";
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileId = urlParams.get('file');
+
+        // ROUTER: Check if this is a download request or upload page
+        if (fileId) {
+            document.getElementById('uploadView').classList.add('hidden');
+            document.getElementById('downloadView').classList.remove('hidden');
+            setupDownload(fileId);
+        }
+
+        // Drag & Drop Handlers
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleUpload(e.target.files[0]));
+
+        function handleUpload(file) {
+            if (!file) return;
+
+            document.getElementById('progressBox').classList.remove('hidden');
+            document.getElementById('fileName').innerText = file.name;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://pixeldrain.com/api/file', true);
+            xhr.setRequestHeader('Authorization', 'Basic ' + btoa(':' + API_KEY));
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    document.getElementById('progressBar').style.width = percent + '%';
+                    document.getElementById('percentText').innerText = percent + '%';
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 201) {
+                    const response = JSON.parse(xhr.responseText);
+                    const generatedUrl = `${window.location.origin}${window.location.pathname}?file=${response.id}`;
+                    document.getElementById('shareLink').value = generatedUrl;
+                    document.getElementById('resultBox').classList.remove('hidden');
+                    document.getElementById('dropZone').classList.add('hidden');
+                } else {
+                    alert('Upload failed! Check API key or file limits.');
+                }
+            };
+
+            const formData = new FormData();
+            formData.append('file', file);
+            xhr.send(formData);
+        }
+
+        function setupDownload(id) {
+            const directApiUrl = `https://pixeldrain.com/api/file/${id}?download`;
+            const manualBtn = document.getElementById('manualDlBtn');
+            manualBtn.href = directApiUrl;
+
+            // Fetch file meta info
+            fetch(`https://pixeldrain.com/api/file/${id}/info`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.name) document.getElementById('dlFileName').innerText = data.name;
+                });
+
+            // Countdown & Trigger
+            let seconds = 3;
+            const interval = setInterval(() => {
+                seconds--;
+                document.getElementById('timer').innerText = seconds;
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    window.location.href = directApiUrl;
+                }
+            }, 1000);
+        }
+
+        function copyLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            document.execCommand('copy');
+            alert('Share link copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
