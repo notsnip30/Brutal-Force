@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRUTAL DRIVE - Direct Storage</title>
+    <title>BRUTAL DRIVE - Link Gateway</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -59,48 +59,41 @@
             <h1 class="text-3xl font-black text-red-500 tracking-wider flex items-center justify-center gap-2 glow-title">
                 <i class="fa-solid fa-bolt animate-pulse"></i> BRUTAL DRIVE
             </h1>
-            <p class="text-[11px] text-zinc-400 font-mono tracking-widest mt-1 uppercase">Direct Storage Gateway • Zero Errors</p>
+            <p class="text-[11px] text-zinc-400 font-mono tracking-widest mt-1 uppercase">Automated Shortener & Direct Gateway</p>
         </div>
 
-        <div id="uploadView" class="space-y-5 fade-in">
-            <div id="dropZone" class="glass-input p-8 text-center cursor-pointer transition-all duration-300 hover:border-red-500 group">
-                <i class="fa-solid fa-cloud-arrow-up text-5xl text-zinc-600 group-hover:text-red-500 mb-3 transition-transform duration-300 group-hover:scale-110"></i>
-                <p class="text-sm text-zinc-200 font-bold uppercase tracking-wide">Drop File or Click</p>
-                <p class="text-[11px] text-zinc-500 mt-1">Permanent Direct Storage Gateway</p>
-                <input type="file" id="fileInput" class="hidden">
+        <!-- GENERATOR VIEW: SHOWS SHORTENED LINK GENERATION STATUS -->
+        <div id="shortenerView" class="space-y-5 fade-in">
+            <div class="p-6 glass-input relative text-center">
+                <i id="genIcon" class="fa-solid fa-gears text-5xl text-red-500 mb-3 animate-spin"></i>
+                <h3 id="genTitle" class="text-sm font-black text-zinc-100 uppercase tracking-wide">
+                    Generating Short Link...
+                </h3>
+                <p id="genStatus" class="text-[11px] text-zinc-400 font-mono mt-1">
+                    Contacting EXE.IO Gateway API...
+                </p>
             </div>
 
-            <!-- Upload Progress Bar -->
-            <div id="progressBox" class="hidden space-y-2 glass-input p-4 fade-in transition-all">
-                <div class="flex justify-between text-xs font-semibold text-zinc-300">
-                    <span id="fileName" class="truncate max-w-[200px] transition-colors">Uploading...</span>
-                    <span id="percentText" class="text-red-500 font-bold">0%</span>
-                </div>
-                <div class="w-full bg-zinc-900 rounded-full h-2 overflow-hidden border border-zinc-800">
-                    <div id="progressBar" class="bg-gradient-to-r from-red-600 to-red-400 h-full w-0 transition-all duration-150"></div>
-                </div>
-            </div>
-
-            <!-- Share Link Container -->
-            <div id="resultBox" class="hidden space-y-3 glass-input p-4 fade-in">
-                <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Shareable Direct Download Link:</label>
+            <div id="shortenerResult" class="hidden space-y-3 glass-input p-4 fade-in">
+                <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Your Monetized / Protection Link:</label>
                 <div class="flex gap-2">
-                    <input type="text" id="shareLink" readonly class="w-full bg-zinc-950/80 border border-zinc-800 rounded px-3 py-2 text-xs text-red-400 font-mono focus:outline-none">
-                    <button onclick="copyLink('shareLink')" class="btn-cyber px-4 py-2 text-white text-xs font-bold flex items-center gap-1 active:scale-95">
+                    <input type="text" id="generatedUrl" readonly class="w-full bg-zinc-950/80 border border-zinc-800 rounded px-3 py-2 text-xs text-red-400 font-mono focus:outline-none">
+                    <button onclick="copyText(document.getElementById('generatedUrl').value)" class="btn-cyber px-4 py-2 text-white text-xs font-bold flex items-center gap-1 active:scale-95">
                         <i class="fa-solid fa-copy"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- LOCAL STORAGE VAULT -->
-            <div class="pt-4 border-t border-zinc-800/80">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock-rotate-left text-red-500"></i> Local Storage Vault
-                    </h3>
-                    <button onclick="clearHistory()" class="text-[10px] text-zinc-500 hover:text-red-400 transition">Clear All</button>
-                </div>
-                <div id="historyList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+            <!-- MANUAL CONTROLS & DISCORD -->
+            <div class="space-y-2">
+                <button onclick="generateShortLink('exe')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center">
+                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force EXE.IO Generation</span>
+                    <i class="fa-solid fa-chevron-right text-zinc-500 text-[10px]"></i>
+                </button>
+                <button onclick="generateShortLink('cuty')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center">
+                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force CUTY.IO Generation</span>
+                    <i class="fa-solid fa-chevron-right text-zinc-500 text-[10px]"></i>
+                </button>
             </div>
 
             <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300">
@@ -115,18 +108,41 @@
             </button>
         </div>
 
+        <!-- DOWNLOAD VIEW: TRIGGERED UPON REDIRECT (e.g. ?complete) -->
         <div id="downloadView" class="hidden text-center space-y-5 fade-in">
-            <div class="p-6 glass-input">
+            <div class="p-6 glass-input relative group">
+                <div class="absolute -top-3 right-3 bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest border border-red-400">
+                    VERIFIED FILE
+                </div>
                 <i class="fa-solid fa-file-zipper text-5xl text-red-500 mb-3 animate-bounce"></i>
-                <h3 class="text-sm font-bold text-zinc-100 break-all" id="dlFileName">Loading File...</h3>
-                <p class="text-[11px] text-zinc-500 mt-1">Direct Download Gateway</p>
+                <h3 class="text-base font-black text-zinc-100 break-all uppercase tracking-wide" id="fileTitle">
+                    Brutal_Force_V1.7z
+                </h3>
+                <p class="text-[11px] text-zinc-400 font-mono mt-1" id="fileSubtext">
+                    BACKUP ROM NON ROOT BRUTAL FORCE V1 INJECTOR
+                </p>
             </div>
-            <p class="text-xs text-zinc-400">
-                Automatic download starting in <span id="timer" class="text-red-500 font-bold text-sm">3</span>s...
-            </p>
-            <a id="manualDlBtn" href="#" class="btn-cyber inline-block w-full text-white font-bold py-3 text-xs tracking-wider uppercase active:scale-95">
+
+            <div class="glass-input p-3">
+                <p class="text-xs text-zinc-300 font-medium">
+                    Automatic download starting in <span id="timer" class="text-red-500 font-black text-base px-1">3</span>s...
+                </p>
+            </div>
+
+            <a id="downloadBtn" href="#" class="btn-cyber block w-full text-white font-bold py-3.5 text-xs tracking-wider uppercase active:scale-95 text-center">
                 <i class="fa-solid fa-download mr-1.5"></i> Download File Now
             </a>
+
+            <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300">
+                <div class="flex items-center gap-3">
+                    <i class="fa-brands fa-discord text-2xl text-indigo-400 group-hover:scale-110 transition-transform"></i>
+                    <div class="text-left">
+                        <p class="text-xs font-bold text-zinc-200">BRUTAL FORCE DISCORD</p>
+                        <p class="text-[10px] text-zinc-400">Panels, Injectors & Exchange Services</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-zinc-500 group-hover:text-indigo-400 transition-colors"></i>
+            </button>
         </div>
     </div>
 
@@ -157,185 +173,124 @@
     </div>
 
     <script>
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
+        // CONFIGURATION SETUP
+        const GDRIVE_DIRECT_URL = "https://drive.usercontent.google.com/download?id=1xr1Q_6LjKQeT_TvKlgibZ0i1UXqCunR2&export=download&confirm=t
+        ";
+        const REDIRECT_DESTINATION = "https://notsnip30.github.io/Brutal-Force/?complete";
+
+        const EXE_API_KEY = "747727238dcb80e155f1022cd1cd67a00d7a0f73";
+        const CUTY_API_KEY = "51de1b44bfcdf0af37f2302cfc9605641d02e726";
+
+        // ROUTER INITIALIZATION
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+        const path = window.location.pathname.toLowerCase();
 
-        if (token) {
-            document.getElementById('uploadView').classList.add('hidden');
+        if (urlParams.has('complete') || path.includes('/d=')) {
+            // SHOW DIRECT DOWNLOAD PAGE
+            document.getElementById('shortenerView').classList.add('hidden');
             document.getElementById('downloadView').classList.remove('hidden');
-            setupDownloadRoute(token);
+            startDownloadSequence();
+        } else if (urlParams.get('shorten') === 'cuty' || path.endsWith('/cuty')) {
+            // TRIGGER CUTY.IO SHORTENER DIRECTLY
+            generateShortLink('cuty');
         } else {
-            renderHistory();
+            // DEFAULT: TRIGGER EXE.IO SHORTENER WITH AUTOMATIC FAILOVER
+            generateShortLink('exe');
         }
 
-        dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-red-500'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-red-500'));
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault(); dropZone.classList.remove('border-red-500');
-            if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleUpload(e.target.files[0]); });
+        async function generateShortLink(primaryService) {
+            const genTitle = document.getElementById('genTitle');
+            const genStatus = document.getElementById('genStatus');
+            const genIcon = document.getElementById('genIcon');
+            const shortenerResult = document.getElementById('shortenerResult');
+            const generatedUrlInput = document.getElementById('generatedUrl');
 
-        function handleUpload(file) {
-            if (!file) return;
+            genIcon.className = "fa-solid fa-gears text-5xl text-red-500 mb-3 animate-spin";
+            shortenerResult.classList.add('hidden');
 
-            const progressBox = document.getElementById('progressBox');
-            const fileNameEl = document.getElementById('fileName');
-            const progressBar = document.getElementById('progressBar');
-            const percentText = document.getElementById('percentText');
-            const resultBox = document.getElementById('resultBox');
+            let shortenedUrl = null;
 
-            progressBox.classList.remove('hidden');
-            resultBox.classList.add('hidden');
-            fileNameEl.innerText = file.name;
-            fileNameEl.className = 'truncate max-w-[200px] text-zinc-300';
-            progressBar.style.width = '0%';
-            percentText.innerText = '0%';
+            if (primaryService === 'exe') {
+                genTitle.innerText = "Requesting EXE.IO Gateway...";
+                genStatus.innerText = "Generating monetized link...";
+                shortenedUrl = await fetchShortUrl('exe');
 
-            const xhr = new XMLHttpRequest();
-            // PUT request direct stream to Pixeldrain API (No multipart boundary issue = Zero 412/422 Errors)
-            xhr.open('PUT', 'https://pixeldrain.com/api/file/' + encodeURIComponent(file.name), true);
-
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                    const percent = Math.round((e.loaded / e.total) * 100);
-                    progressBar.style.width = percent + '%';
-                    
-                    if (percent < 100) {
-                        percentText.innerText = percent + '%';
-                    } else {
-                        percentText.innerText = '100%';
-                        fileNameEl.innerText = 'Upload Done Link generating...';
-                        fileNameEl.classList.add('text-red-400', 'animate-pulse');
-                    }
+                if (!shortenedUrl) {
+                    genTitle.innerText = "EXE.IO Failed • Switching to CUTY.IO";
+                    genStatus.innerText = "Failover triggered automatically...";
+                    shortenedUrl = await fetchShortUrl('cuty');
                 }
-            };
+            } else {
+                genTitle.innerText = "Requesting CUTY.IO Gateway...";
+                genStatus.innerText = "Generating monetized link...";
+                shortenedUrl = await fetchShortUrl('cuty');
+            }
 
-            xhr.onload = () => {
-                fileNameEl.classList.remove('animate-pulse');
-
-                if (xhr.status === 200 || xhr.status === 201) {
-                    try {
-                        const res = JSON.parse(xhr.responseText);
-                        if (res.success) {
-                            const directDownloadUrl = 'https://pixeldrain.com/api/file/' + res.id;
-                            const fullShareUrl = `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(directDownloadUrl)}`;
-
-                            document.getElementById('shareLink').value = fullShareUrl;
-                            resultBox.classList.remove('hidden');
-                            
-                            fileNameEl.innerText = 'Link Generated Successfully!';
-                            fileNameEl.classList.remove('text-red-400');
-                            fileNameEl.classList.add('text-green-400');
-                            percentText.innerText = '';
-
-                            saveToLocalStorage(file.name, fullShareUrl);
-                            renderHistory();
-                        } else {
-                            fileNameEl.innerText = 'Upload Error';
-                            fileNameEl.classList.add('text-red-500');
-                        }
-                    } catch(err) {
-                        fileNameEl.innerText = 'Parse Error';
-                        fileNameEl.classList.add('text-red-500');
-                    }
-                } else {
-                    fileNameEl.innerText = 'Error ' + xhr.status;
-                    fileNameEl.classList.add('text-red-500');
-                }
-            };
-
-            xhr.onerror = () => {
-                fileNameEl.innerText = 'Network Connection Failed';
-                fileNameEl.classList.add('text-red-500');
-            };
-
-            xhr.send(file);
+            if (shortenedUrl) {
+                genIcon.className = "fa-solid fa-circle-check text-5xl text-green-500 mb-3";
+                genTitle.innerText = "Link Generated Successfully";
+                genStatus.innerText = "Share this link with users:";
+                generatedUrlInput.value = shortenedUrl;
+                shortenerResult.classList.remove('hidden');
+            } else {
+                genIcon.className = "fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-3";
+                genTitle.innerText = "Shortener Generation Error";
+                genStatus.innerText = "Both gateways failed to respond.";
+            }
         }
 
-        function setupDownloadRoute(encodedUrl) {
-            const directUrl = decodeURIComponent(encodedUrl);
-            const fileName = directUrl.split('/').pop() || 'File';
+        async function fetchShortUrl(provider) {
+            let apiUrl = "";
+            if (provider === 'exe') {
+                apiUrl = `https://exe.io/api?api=${EXE_API_KEY}&url=${encodeURIComponent(REDIRECT_DESTINATION)}`;
+            } else if (provider === 'cuty') {
+                apiUrl = `https://cuty.io/api?api=${CUTY_API_KEY}&url=${encodeURIComponent(REDIRECT_DESTINATION)}`;
+            }
 
-            document.getElementById('dlFileName').innerText = fileName;
-            document.getElementById('manualDlBtn').href = directUrl;
+            // Using AllOrigins CORS proxy to ensure browser fetch compatibility without blocked API headers
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) return null;
+                const data = await response.json();
+                const apiData = JSON.parse(data.contents);
+
+                if (apiData.status === "success" && apiData.shortenedUrl) {
+                    return apiData.shortenedUrl;
+                } else if (apiData.shortenedUrl) {
+                    return apiData.shortenedUrl;
+                } else if (apiData.url) {
+                    return apiData.url;
+                }
+                return null;
+            } catch (e) {
+                console.error(`${provider} shortener error:`, e);
+                return null;
+            }
+        }
+
+        function startDownloadSequence() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.href = GDRIVE_DIRECT_URL;
 
             let seconds = 3;
-            const interval = setInterval(() => {
+            const timerElement = document.getElementById('timer');
+            
+            const countdown = setInterval(() => {
                 seconds--;
-                document.getElementById('timer').innerText = seconds;
+                timerElement.innerText = seconds;
                 if (seconds <= 0) {
-                    clearInterval(interval);
-                    window.location.href = directUrl;
+                    clearInterval(countdown);
+                    window.location.href = GDRIVE_DIRECT_URL;
                 }
             }, 1000);
         }
 
-        function getStorageData() { return JSON.parse(localStorage.getItem('brutal_uploads') || '[]'); }
-
-        function saveToLocalStorage(name, link) {
-            const history = getStorageData();
-            history.unshift({ name, link, date: new Date().toLocaleDateString() });
-            localStorage.setItem('brutal_uploads', JSON.stringify(history));
+        function copyText(text) { 
+            navigator.clipboard.writeText(text); 
+            alert('Shortened link copied to clipboard!'); 
         }
-
-        function renderHistory() {
-            const history = getStorageData();
-            const container = document.getElementById('historyList');
-            container.innerHTML = '';
-
-            if (history.length === 0) {
-                container.innerHTML = `<p class="text-center text-[11px] text-zinc-600 py-3 font-mono">Vault Empty</p>`;
-                return;
-            }
-
-            history.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = "glass-input p-2.5 flex items-center justify-between text-xs space-x-2";
-                div.innerHTML = `
-                    <div class="truncate max-w-[150px]">
-                        <p class="text-zinc-200 font-bold truncate text-[11px]">${item.name}</p>
-                        <p class="text-[9px] text-zinc-500 font-mono">${item.date}</p>
-                    </div>
-                    <div class="flex items-center space-x-1">
-                        <button onclick="copyText('${item.link}')" class="text-zinc-400 hover:text-white p-1"><i class="fa-solid fa-copy"></i></button>
-                        <button onclick="renameFile(${index})" class="text-zinc-400 hover:text-yellow-400 p-1"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteFile(${index})" class="text-zinc-400 hover:text-red-500 p-1"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function renameFile(index) {
-            const history = getStorageData();
-            const newName = prompt("New name for record:", history[index].name);
-            if (newName && newName.trim() !== "") {
-                history[index].name = newName.trim();
-                localStorage.setItem('brutal_uploads', JSON.stringify(history));
-                renderHistory();
-            }
-        }
-
-        function deleteFile(index) {
-            const history = getStorageData();
-            history.splice(index, 1);
-            localStorage.setItem('brutal_uploads', JSON.stringify(history));
-            renderHistory();
-        }
-
-        function clearHistory() {
-            if (confirm("Clear local vault history?")) {
-                localStorage.removeItem('brutal_uploads');
-                renderHistory();
-            }
-        }
-
-        function copyLink(elementId) { copyText(document.getElementById(elementId).value); }
-        function copyText(text) { navigator.clipboard.writeText(text); alert('Link copied to clipboard!'); }
         function openDiscordModal() { document.getElementById('discordModal').classList.remove('hidden'); }
         function closeDiscordModal() { document.getElementById('discordModal').classList.add('hidden'); }
     </script>
