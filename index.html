@@ -237,7 +237,7 @@
         });
         fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleUpload(e.target.files[0]); });
 
-        // CORS-safe Direct Upload Handler
+        // Native CORS-enabled Upload Handler (tmpfiles.org API)
         function handleUpload(file) {
             if (!file) return;
 
@@ -245,11 +245,10 @@
             document.getElementById('fileName').innerText = file.name;
 
             const formData = new FormData();
-            formData.append('reqtype', 'fileupload');
-            formData.append('fileToUpload', file);
+            formData.append('file', file);
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'https://catbox.moe/user/api.php', true);
+            xhr.open('POST', 'https://tmpfiles.org/api/v1/upload', true);
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -260,36 +259,40 @@
             };
 
             xhr.onload = () => {
-                if (xhr.status === 200 && xhr.responseText.startsWith('http')) {
-                    const directFileUrl = xhr.responseText.trim(); 
-                    const fileCode = directFileUrl.split('/').pop(); 
-                    
-                    const formattedToken = `${fileCode}BrutalForce/${encodeURIComponent(file.name)}`;
-                    const fullShareUrl = `${window.location.origin}${window.location.pathname}?token=${formattedToken}`;
+                if (xhr.status === 200) {
+                    const res = JSON.parse(xhr.responseText);
+                    if (res.status === 'success') {
+                        // Transform URL: https://tmpfiles.org/12345/filename.ext -> https://tmpfiles.org/dl/12345/filename.ext
+                        const rawUrl = res.data.url;
+                        const directUrl = rawUrl.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                        const filePath = directUrl.split('tmpfiles.org/dl/')[1];
+                        
+                        const formattedToken = `${filePath}`;
+                        const fullShareUrl = `${window.location.origin}${window.location.pathname}?token=${formattedToken}`;
 
-                    document.getElementById('shareLink').value = fullShareUrl;
-                    document.getElementById('resultBox').classList.remove('hidden');
-                    
-                    saveToLocalStorage(fileCode, file.name, fullShareUrl);
-                    renderHistory();
+                        document.getElementById('shareLink').value = fullShareUrl;
+                        document.getElementById('resultBox').classList.remove('hidden');
+                        
+                        saveToLocalStorage(filePath, file.name, fullShareUrl);
+                        renderHistory();
+                    } else {
+                        alert('Upload Error: Could not process file.');
+                    }
                 } else {
-                    alert('Upload failed: ' + xhr.responseText);
+                    alert('Server error: HTTP ' + xhr.status);
                 }
             };
 
-            xhr.onerror = () => alert('Network Error during upload.');
+            xhr.onerror = () => alert('Network error occurred during upload.');
             xhr.send(formData);
         }
 
         // Parse token route
         function setupDownloadRoute(tokenPath) {
-            const parts = tokenPath.split('BrutalForce/');
-            const fileCode = parts[0];
-            const rawFileName = parts[1] || 'Brutal_Force_File';
-            const fileName = decodeURIComponent(rawFileName);
+            const directApiUrl = `https://tmpfiles.org/dl/${tokenPath}`;
+            const fileName = tokenPath.split('/').pop() || 'Brutal_Force_File';
 
-            const directApiUrl = `https://files.catbox.moe/${fileCode}`;
-            document.getElementById('dlFileName').innerText = fileName;
+            document.getElementById('dlFileName').innerText = decodeURIComponent(fileName);
             document.getElementById('manualDlBtn').href = directApiUrl;
 
             let seconds = 3;
@@ -347,8 +350,6 @@
             const newName = prompt("New name for record:", history[index].name);
             if (newName && newName.trim() !== "") {
                 history[index].name = newName.trim();
-                const updatedToken = `${history[index].id}BrutalForce/${encodeURIComponent(newName.trim())}`;
-                history[index].link = `${window.location.origin}${window.location.pathname}?token=${updatedToken}`;
                 localStorage.setItem('brutal_uploads', JSON.stringify(history));
                 renderHistory();
             }
