@@ -22,21 +22,22 @@
             100% { transform: scale(1.05) translate(2%, -2%); }
         }
 
+        /* Modern Rounded Glass Containers */
         .glass-cyber {
-            background: rgba(18, 18, 23, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            background: rgba(18, 18, 23, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            clip-path: polygon(0% 15px, 15px 0%, 100% 0%, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0% 100%);
+            border-radius: 1.25rem;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(239, 68, 68, 0.05);
         }
 
         .glass-input {
             background: rgba(10, 10, 14, 0.7); border: 1px solid rgba(239, 68, 68, 0.3);
-            clip-path: polygon(0% 8px, 8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%);
+            border-radius: 0.85rem;
         }
 
         .btn-cyber {
             background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-            clip-path: polygon(0% 10px, 10px 0%, 100% 0%, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0% 100%);
+            border-radius: 0.85rem;
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .btn-cyber:hover { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); transform: translateY(-2px); }
@@ -59,10 +60,10 @@
             <h1 class="text-3xl font-black text-red-500 tracking-wider flex items-center justify-center gap-2 glow-title">
                 <i class="fa-solid fa-bolt animate-pulse"></i> BRUTAL DRIVE
             </h1>
-            <p class="text-[11px] text-zinc-400 font-mono tracking-widest mt-1 uppercase">Automated Shortener & Direct Gateway</p>
+            <p class="text-[11px] text-zinc-400 font-mono tracking-widest mt-1 uppercase">Direct Gateway & Protection</p>
         </div>
 
-        <!-- GENERATOR VIEW: SHOWS SHORTENED LINK GENERATION STATUS -->
+        <!-- GENERATOR VIEW -->
         <div id="shortenerView" class="space-y-5 fade-in">
             <div class="p-6 glass-input relative text-center">
                 <i id="genIcon" class="fa-solid fa-gears text-5xl text-red-500 mb-3 animate-spin"></i>
@@ -70,14 +71,14 @@
                     Generating Short Link...
                 </h3>
                 <p id="genStatus" class="text-[11px] text-zinc-400 font-mono mt-1">
-                    Contacting EXE.IO Gateway API...
+                    Contacting Shortener Gateway API...
                 </p>
             </div>
 
             <div id="shortenerResult" class="hidden space-y-3 glass-input p-4 fade-in">
                 <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Your Monetized / Protection Link:</label>
                 <div class="flex gap-2">
-                    <input type="text" id="generatedUrl" readonly class="w-full bg-zinc-950/80 border border-zinc-800 rounded px-3 py-2 text-xs text-red-400 font-mono focus:outline-none">
+                    <input type="text" id="generatedUrl" readonly class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-red-400 font-mono focus:outline-none">
                     <button onclick="copyText(document.getElementById('generatedUrl').value)" class="btn-cyber px-4 py-2 text-white text-xs font-bold flex items-center gap-1 active:scale-95">
                         <i class="fa-solid fa-copy"></i>
                     </button>
@@ -86,17 +87,17 @@
 
             <!-- MANUAL CONTROLS & DISCORD -->
             <div class="space-y-2">
-                <button onclick="generateShortLink('exe')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center">
-                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force EXE.IO Generation</span>
+                <button onclick="generateShortLink('exe')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center rounded-xl">
+                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force EXE.IO Link</span>
                     <i class="fa-solid fa-chevron-right text-zinc-500 text-[10px]"></i>
                 </button>
-                <button onclick="generateShortLink('cuty')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center">
-                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force CUTY.IO Generation</span>
+                <button onclick="generateShortLink('cuty')" class="w-full glass-input p-3 text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500 transition text-left flex justify-between items-center rounded-xl">
+                    <span><i class="fa-solid fa-link text-red-500 mr-2"></i> Force CUTY.IO Link</span>
                     <i class="fa-solid fa-chevron-right text-zinc-500 text-[10px]"></i>
                 </button>
             </div>
 
-            <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300">
+            <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300 rounded-xl">
                 <div class="flex items-center gap-3">
                     <i class="fa-brands fa-discord text-2xl text-indigo-400 group-hover:scale-110 transition-transform"></i>
                     <div class="text-left">
@@ -108,10 +109,10 @@
             </button>
         </div>
 
-        <!-- DOWNLOAD VIEW: TRIGGERED UPON REDIRECT (e.g. ?complete) -->
+        <!-- DOWNLOAD VIEW: TRIGGERED UPON REDIRECT (?complete or ?download or /d=) -->
         <div id="downloadView" class="hidden text-center space-y-5 fade-in">
             <div class="p-6 glass-input relative group">
-                <div class="absolute -top-3 right-3 bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest border border-red-400">
+                <div class="absolute -top-3 right-3 bg-red-600 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-widest border border-red-400">
                     VERIFIED FILE
                 </div>
                 <i class="fa-solid fa-file-zipper text-5xl text-red-500 mb-3 animate-bounce"></i>
@@ -133,7 +134,7 @@
                 <i class="fa-solid fa-download mr-1.5"></i> Download File Now
             </a>
 
-            <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300">
+            <button onclick="openDiscordModal()" class="w-full mt-2 glass-input p-3 flex items-center justify-between group hover:border-indigo-500 transition-all duration-300 rounded-xl">
                 <div class="flex items-center gap-3">
                     <i class="fa-brands fa-discord text-2xl text-indigo-400 group-hover:scale-110 transition-transform"></i>
                     <div class="text-left">
@@ -174,8 +175,7 @@
 
     <script>
         // CONFIGURATION SETUP
-        const GDRIVE_DIRECT_URL = "https://drive.usercontent.google.com/download?id=1xr1Q_6LjKQeT_TvKlgibZ0i1UXqCunR2&export=download&confirm=t
-        ";
+        const GDRIVE_DIRECT_URL = "https://drive.usercontent.google.com/download?id=1xr1Q_6LjKQeT_TvKlgibZ0i1UXqCunR2&export=download&confirm=t";
         const REDIRECT_DESTINATION = "https://notsnip30.github.io/Brutal-Force/?complete";
 
         const EXE_API_KEY = "747727238dcb80e155f1022cd1cd67a00d7a0f73";
@@ -183,18 +183,19 @@
 
         // ROUTER INITIALIZATION
         const urlParams = new URLSearchParams(window.location.search);
-        const path = window.location.pathname.toLowerCase();
+        const currentUrl = window.location.href.toLowerCase();
 
-        if (urlParams.has('complete') || path.includes('/d=')) {
+        // CHECK IF USER HAS COMPLETED LINK SHORTENER AND RETURNED
+        if (urlParams.has('complete') || currentUrl.includes('complete') || currentUrl.includes('d=')) {
             // SHOW DIRECT DOWNLOAD PAGE
             document.getElementById('shortenerView').classList.add('hidden');
             document.getElementById('downloadView').classList.remove('hidden');
             startDownloadSequence();
-        } else if (urlParams.get('shorten') === 'cuty' || path.endsWith('/cuty')) {
+        } else if (currentUrl.includes('cuty')) {
             // TRIGGER CUTY.IO SHORTENER DIRECTLY
             generateShortLink('cuty');
         } else {
-            // DEFAULT: TRIGGER EXE.IO SHORTENER WITH AUTOMATIC FAILOVER
+            // DEFAULT: TRIGGER EXE.IO SHORTENER WITH FAILOVER
             generateShortLink('exe');
         }
 
@@ -213,33 +214,46 @@
             if (primaryService === 'exe') {
                 genTitle.innerText = "Requesting EXE.IO Gateway...";
                 genStatus.innerText = "Generating monetized link...";
-                shortenedUrl = await fetchShortUrl('exe');
+                shortenedUrl = await fetchWithTimeout('exe', 5000);
 
                 if (!shortenedUrl) {
                     genTitle.innerText = "EXE.IO Failed • Switching to CUTY.IO";
                     genStatus.innerText = "Failover triggered automatically...";
-                    shortenedUrl = await fetchShortUrl('cuty');
+                    shortenedUrl = await fetchWithTimeout('cuty', 5000);
                 }
             } else {
                 genTitle.innerText = "Requesting CUTY.IO Gateway...";
                 genStatus.innerText = "Generating monetized link...";
-                shortenedUrl = await fetchShortUrl('cuty');
+                shortenedUrl = await fetchWithTimeout('cuty', 5000);
             }
 
             if (shortenedUrl) {
                 genIcon.className = "fa-solid fa-circle-check text-5xl text-green-500 mb-3";
-                genTitle.innerText = "Link Generated Successfully";
-                genStatus.innerText = "Share this link with users:";
+                genTitle.innerText = "Shortened Link Ready";
+                genStatus.innerText = "Directing to destination link...";
                 generatedUrlInput.value = shortenedUrl;
                 shortenerResult.classList.remove('hidden');
+
+                // AUTO REDIRECT TO SHORTENED LINK AFTER GENERATION
+                setTimeout(() => {
+                    window.location.href = shortenedUrl;
+                }, 1500);
+
             } else {
-                genIcon.className = "fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-3";
-                genTitle.innerText = "Shortener Generation Error";
-                genStatus.innerText = "Both gateways failed to respond.";
+                // FALLBACK IF BOTH APIS ARE BLOCKED BY CORS / AD BLOCKERS
+                genIcon.className = "fa-solid fa-triangle-exclamation text-5xl text-yellow-500 mb-3";
+                genTitle.innerText = "Direct Redirect Active";
+                genStatus.innerText = "APIs busy or blocked. Redirecting to download...";
+                setTimeout(() => {
+                    window.location.href = REDIRECT_DESTINATION;
+                }, 2000);
             }
         }
 
-        async function fetchShortUrl(provider) {
+        async function fetchWithTimeout(provider, timeout = 5000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+
             let apiUrl = "";
             if (provider === 'exe') {
                 apiUrl = `https://exe.io/api?api=${EXE_API_KEY}&url=${encodeURIComponent(REDIRECT_DESTINATION)}`;
@@ -247,25 +261,20 @@
                 apiUrl = `https://cuty.io/api?api=${CUTY_API_KEY}&url=${encodeURIComponent(REDIRECT_DESTINATION)}`;
             }
 
-            // Using AllOrigins CORS proxy to ensure browser fetch compatibility without blocked API headers
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
 
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(proxyUrl, { signal: controller.signal });
+                clearTimeout(id);
                 if (!response.ok) return null;
                 const data = await response.json();
                 const apiData = JSON.parse(data.contents);
 
-                if (apiData.status === "success" && apiData.shortenedUrl) {
-                    return apiData.shortenedUrl;
-                } else if (apiData.shortenedUrl) {
-                    return apiData.shortenedUrl;
-                } else if (apiData.url) {
-                    return apiData.url;
-                }
+                if (apiData.shortenedUrl) return apiData.shortenedUrl;
+                if (apiData.url) return apiData.url;
                 return null;
             } catch (e) {
-                console.error(`${provider} shortener error:`, e);
+                console.error(`${provider} API Error or Timeout:`, e);
                 return null;
             }
         }
