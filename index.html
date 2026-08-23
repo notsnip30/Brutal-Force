@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brutal Drive - Direct Gateway</title>
+    <title>Brutal Drive - Direct Host</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -30,7 +30,7 @@
             <div id="dropZone" class="border-2 border-dashed border-zinc-700 hover:border-red-500 bg-zinc-950/50 hover:bg-zinc-950 rounded-xl p-8 text-center cursor-pointer transition-all duration-300">
                 <i class="fa-solid fa-cloud-arrow-up text-4xl text-zinc-500 mb-3 transition-transform hover:scale-110"></i>
                 <p class="text-sm text-zinc-200 font-bold">Click or Drag File to Upload</p>
-                <p class="text-xs text-zinc-500 mt-1">High-Speed Direct Gateway via Pixeldrain</p>
+                <p class="text-xs text-zinc-500 mt-1">Direct CORS Upload | Up to 200MB</p>
                 <input type="file" id="fileInput" class="hidden">
             </div>
 
@@ -66,7 +66,7 @@
                 </div>
 
                 <div id="historyList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
-                    <!-- Dynamic items added here -->
+                    <!-- Dynamic items -->
                 </div>
             </div>
         </div>
@@ -75,7 +75,7 @@
         <div id="downloadView" class="hidden text-center space-y-5 fade-in">
             <div class="p-5 bg-zinc-950 border border-zinc-800 rounded-xl">
                 <i class="fa-solid fa-file-zipper text-4xl text-red-500 mb-3 animate-bounce"></i>
-                <h3 class="text-sm font-bold text-zinc-100 break-all" id="dlFileName">Loading File Info...</h3>
+                <h3 class="text-sm font-bold text-zinc-100 break-all" id="dlFileName">Loading File...</h3>
                 <p class="text-xs text-zinc-500 mt-1">Direct Download Trigger</p>
             </div>
 
@@ -84,13 +84,12 @@
             </p>
 
             <a id="manualDlBtn" href="#" class="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-red-900/20 active:scale-95">
-                <i class="fa-solid fa-download mr-1.5"></i> Grant Permission & Download
+                <i class="fa-solid fa-download mr-1.5"></i> Download File Now
             </a>
         </div>
     </div>
 
     <script>
-        const API_KEY = "829c423d-b0f5-4e16-a1a2-8ca8008f0dda";
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const urlParams = new URLSearchParams(window.location.search);
@@ -116,20 +115,19 @@
         });
         fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleUpload(e.target.files[0]); });
 
-        // Pixeldrain PUT Upload Stream (Bypasses Network Error / CORS)
+        // CORS-friendly Upload Handler (catbox.moe API)
         function handleUpload(file) {
             if (!file) return;
 
             document.getElementById('progressBox').classList.remove('hidden');
             document.getElementById('fileName').innerText = file.name;
 
+            const formData = new FormData();
+            formData.append('reqtype', 'fileupload');
+            formData.append('fileToUpload', file);
+
             const xhr = new XMLHttpRequest();
-            const uploadUrl = `https://pixeldrain.com/api/file/${encodeURIComponent(file.name)}`;
-            
-            xhr.open('PUT', uploadUrl, true);
-            
-            // Set basic auth header per Pixeldrain spec
-            xhr.setRequestHeader('Authorization', 'Basic ' + btoa(':' + API_KEY));
+            xhr.open('POST', 'https://catbox.moe/user/api.php', true);
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -140,39 +138,36 @@
             };
 
             xhr.onload = () => {
-                if (xhr.status === 201 || xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText);
-                    const fileId = response.id;
-                    const formattedToken = `${fileId}BrutalForce/${file.name}`;
+                if (xhr.status === 200 && xhr.responseText.startsWith('http')) {
+                    const directFileUrl = xhr.responseText.trim(); 
+                    const fileCode = directFileUrl.split('/').pop(); 
+                    
+                    // Formatted token: fileCode|BrutalForce|Filename
+                    const formattedToken = `${fileCode}BrutalForce/${encodeURIComponent(file.name)}`;
                     const fullShareUrl = `${window.location.origin}${window.location.pathname}?token=${formattedToken}`;
 
                     document.getElementById('shareLink').value = fullShareUrl;
                     document.getElementById('resultBox').classList.remove('hidden');
                     
-                    // Save item to local vault
-                    saveToLocalStorage(fileId, file.name, fullShareUrl);
+                    saveToLocalStorage(fileCode, file.name, fullShareUrl);
                     renderHistory();
                 } else {
-                    alert('Upload failed. Pixeldrain rejected request with status: ' + xhr.status);
+                    alert('Upload failed: ' + xhr.responseText);
                 }
             };
 
-            xhr.onerror = () => {
-                alert('Network Error: If uploading large files, ensure stable network or try uploading via an external browser session.');
-            };
-
-            // Send raw file stream
-            xhr.send(file);
+            xhr.onerror = () => alert('Network Error during upload.');
+            xhr.send(formData);
         }
 
-        // Parse token and setup download route
+        // Parse token route
         function setupDownloadRoute(tokenPath) {
             const parts = tokenPath.split('BrutalForce/');
-            const fileId = parts[0];
+            const fileCode = parts[0];
             const rawFileName = parts[1] || 'Brutal_Force_File';
             const fileName = decodeURIComponent(rawFileName);
 
-            const directApiUrl = `https://pixeldrain.com/api/file/${fileId}?download`;
+            const directApiUrl = `https://files.catbox.moe/${fileCode}`;
             document.getElementById('dlFileName').innerText = fileName;
             document.getElementById('manualDlBtn').href = directApiUrl;
 
@@ -187,7 +182,7 @@
             }, 1000);
         }
 
-        // Local Storage Vault Functions
+        // Local Storage Vault Logic
         function getStorageData() {
             return JSON.parse(localStorage.getItem('brutal_uploads') || '[]');
         }
@@ -228,7 +223,7 @@
 
         function renameFile(index) {
             const history = getStorageData();
-            const newName = prompt("Enter new custom name for this link record:", history[index].name);
+            const newName = prompt("Enter new name for local vault record:", history[index].name);
             if (newName && newName.trim() !== "") {
                 history[index].name = newName.trim();
                 const updatedToken = `${history[index].id}BrutalForce/${encodeURIComponent(newName.trim())}`;
